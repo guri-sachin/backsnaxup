@@ -1,0 +1,115 @@
+@charset "utf-8";
+/* CSS Document */
+
+.da { border:solid 1px #C0AA83;}
+.da1 {background:#C0AA83; color:#230D02; padding-left:20px; padding-top:15px; padding-bottom:15px; font-size:24px; font-weight:600}
+.da2 { padding:100px; display:block; margin-left:auto; margin-right:auto; font-size:40px; color:#39170E; font-weight:600}
+.da4 {border:solid 1px #000; padding-left:none !important;   }
+.da3 { border-bottom:solid 1px #000; }
+.bl {background-image:url(../img/); background-repeat:no-repeat;}
+.bl1 {border:solid 1px #000; margin-top:100px; padding:60px;}
+.at {background:#BC1C21 !important; border:solid 1px #BC1C21 !important;}
+.bl2 {background:#000 !important; border:solid 1px #BC1C21;}
+.bl3 {font-size:30px; color:#3A160A; padding-bottom:20px; display:block; margin-left:auto; margin-right:auto; text-align:center; }
+.bl4 {color:#3A160A; padding-top:0px; padding-bottom:20px;}
+.bl5 {font-size:18px; color:#3A160A; font-weight:700}
+.bxyz {border:solid 1px #000 !important;}
+.sidebar .nav-item .collapse .collapse-inner .collapse-item, .sidebar .nav-item .collapsing .collapse-inner .collapse-item {color:#fff !important}
+.av {background:#BC1C21 !important; border:solid 1px  #BC1C21 !important; margin-bottom:20px;}
+.av:hover {background:#BC1C21 !important; border:solid 1px #BC1C21 !important; margin-bottom:20px;}
+.an {background:#993D1D !important; border:solid 1px #993D1D !important}
+.an1 {background:#BC1C21 !important; border:solid 1px #BC1C21 !important}
+.ax { display:block; margin-left:auto; margin-right:auto; margin-top:20px;}
+.sidebar .nav-item .collapse .collapse-inner {background:#ffffff !important;}
+.sidebar .nav-item .collapse .collapse-inner .collapse-item, .sidebar .nav-item .collapsing .collapse-inner .collapse-item {
+    color: #000 !important;
+}
+.am {color:#fffff !important; font-weight:700 !important;}
+.pi {font-size:100px; font-weight:600; color:#220B03; margin-top:40px;}
+.pi1 {font-size:40px; font-weight:600; color:#220B03;}
+.pi2 {font-size:18px; color:#220B03;}
+footer.sticky-footer .copyright {color:#fff !important; font-size:16px !important;}
+.sidebar-dark .nav-item .nav-link {color:#fff !important;}
+
+table {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+table caption {
+  font-size: 1.5em;
+  margin: .5em 0 .75em;
+}
+
+table tr {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: .35em;
+}
+
+table th,
+table td {
+  padding: .625em;
+  text-align: center;
+}
+
+table th {
+  font-size: .85em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+/* 
+@media screen and (max-width: 600px) {
+  table {
+    border: 0;
+  }
+
+  table caption {
+    font-size: 1.3em;
+  }
+  
+  table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  
+  table tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: .625em;
+  }
+  
+  table td {
+	border-bottom: 1px solid #ddd;
+	display: block;
+	[disabled]font-size: 0.8em;
+	text-align: right;
+  }
+  
+  table td::before {
+    
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+   
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  table td:last-child {
+    border-bottom: 0;
+  }
+  
+}
+  */
