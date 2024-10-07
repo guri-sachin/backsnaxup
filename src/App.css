@@ -1,0 +1,138 @@
+#carouselExampleControls{
+  height:"400px"
+  width ="400px"
+ }
+ 
+ .o{
+   margin-left: 40%;
+   
+ }
+ 
+ #ui{
+  color: black;
+ }
+ .Rl {
+   border: border="2px solid black";
+   height: 50%;
+   width:50%;
+ }
+ #J{
+   margin-right: 45%;
+
+ }
+ #K{
+   margin-left: 10%;
+   position:relative;
+ }
+
+.Or{
+  border:1px solid black;
+  width: 18%;
+  background-color: black;
+  height: 600px;
+}
+
+
+.L{
+  padding: 2%;
+  margin-top: 10%;
+  margin-left: 35%;
+  margin-right: 35%;
+  border:1px solid black;
+  background-color: white;
+}
+#P{
+  padding:5px 110px; font-size:20px;  margin-top:25px ;
+  margin-left: 60px;
+}
+#Input{
+  margin-bottom:16px;
+   height:100px;
+}
+#Location{
+  margin-bottom:16px;
+}
+#auto{color: #000;max-width: 99%;width:300px;position:absolute;z-index: 999;font-size: 15px;padding:10px;border: 1px solid #ddd;outline: none !important;top:5px;border-radius:10px;margin:4px;}
+#map{
+  width: 100%; height: 100vh;margin:0;padding: 0;
+  }
+
+  .brand-centered {
+    display: flex;
+    justify-content: center;
+   
+    width: 100%;
+    left: 0;
+    top: 0;
+  }
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+
+/* blink button */
+  .text-danger-glow {
+    color: #ff4141;
+    text-shadow: 0 0 20px #f00, 0 0 30px #f00, 0 0 40px #f00, 0 0 50px #f00, 0 0 60px #f00, 0 0 70px #f00, 0 0 80px #f00;
+  }
+  
+  .blink {
+    animation: blinker 1s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
+  }
+  @keyframes blinker {  
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  /* active dactive button rent view  */
+  .status-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    position: relative;
+  }
+  
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    animation: blink 2s infinite;
+  }
+  
+  .status-dot.active {
+    background-color: green;
+  }
+  
+  .status-dot.inactive {
+    background-color: red;
+  }
+  
+  @keyframes blink {
+    0%, 50%, 100% {
+      opacity: 1;
+    }
+    25%, 75% {
+      opacity: 0;
+    }
+  }
+  
+
+  .propertys-div{
+    height: 70px;
+    width:1250px;
+    background-color: #000;
+    border-radius: 10px;
+  }
+
+  /* scrolable */
+  .scrollable-content {
+    max-height: 580px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
+  
+  
