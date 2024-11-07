@@ -1,5 +1,7 @@
 
 const express = require('express');
+const compression = require('compression');
+
 const multer = require('multer');
 const axios = require('axios')
 const crypto = require("crypto");
@@ -31,7 +33,18 @@ console.log('Shiprocket Base URL:', SHIPROCKET_BASE_URL);
 
 // const SHIPROCKET_BASE_URL = 'https://apiv2.shiprocket.in/v1/external';
 let token = ''; // Store Shiprocket Token
+router.use(compression());
 
+// Set cache-control headers for static assets
+const oneYear = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
+router.use(express.static(path.join(__dirname, 'build'), {
+    maxAge: oneYear // Cache static files for 1 year
+}));
+
+// Add a route for other endpoints if needed
+// router.get('*', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+// });
 
 // Shiprocket API Authentication
 async function getAuthToken() {
@@ -52,39 +65,90 @@ async function getAuthToken() {
 //for user
 const sendEmailToUser = async (billing_email, order_id, order_items) => {
   const mailOptions = {
-    from: 'surbhigulhana3@gmail.com',
+    from: 'snaxupfoods@gmail.com',
     to: billing_email,
     subject: `Order Confirmation #${order_id}`,
-    html: `<p>Thank you for your order!</p>
-           <p>Order ID: ${order_id}</p>
-           <p>Items: ${order_items.map(item => `${item.name} (Qty: ${item.units})`).join(', ')}</p>
-           <p>Happy shopping!
-           Thank you for your purchase! 🎉
-We hope you enjoy your new items. Your order is on its way, and we're excited to be part of your shopping journey! If you need anything, we're here to help. Have a great day and happy shopping! 🛒😊
-Don't forget to check back for more great deals and surprises! ✨</p>`
+    html: `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <div style="text-align: center; background-color: #f7f7f7; padding: 20px;">
+        <h1 style="color: #ff6f61;">Thank you for your order!</h1>
+        <p style="font-size: 18px;">Your order is confirmed.</p>
+        <p style="font-size: 16px;">Order ID: <strong>#${order_id}</strong></p>
+      </div>
+
+      <div style="padding: 20px; border-bottom: 2px solid #ff6f61;">
+        <h2 style="color: #ff6f61;">Order Summary</h2>
+        <ul style="list-style-type: none; padding: 0; font-size: 16px;">
+          ${order_items.map(item => 
+            `<li>
+              <strong>${item.name}</strong> (Qty: ${item.units})
+            </li>`
+          ).join('')}
+        </ul>
+      </div>
+
+      <div style="padding: 20px; background-color: #f7f7f7;">
+        <h3 style="color: #ff6f61;">Happy Shopping! 🎉</h3>
+        <p>Your order is on its way! We hope you enjoy your new items. If you need anything, we're here to help. 😊</p>
+        <p>Don't forget to check back for more great deals and surprises! ✨</p>
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+          
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+        <a href="https://b2b.snaxup.com" style="text-decoration: none; background-color: #ff6f61; color: #fff; padding: 10px 20px; border-radius: 5px; font-size: 16px;">Shop More</a>
+      </div>
+
+      <div style="text-align: center; padding: 10px; background-color: #ff6f61; color: #fff;">
+        <p>Thanks for shopping with us! - SnaxUp Foods Team</p>
+      </div>
+    </div>`,
   };
 
   await transporter.sendMail(mailOptions);
 };
+
 //for shipping and admin
 
 const sendEmailToAdminAndDeliveryPartner = async (order_id, billing_email, order_items, billing_city) => {
   const mailOptions = {
-    from: 'surbhigulhana3@gmail.com',
-    to: ['guriguriguri333th@gmail.com', 'gurisachin09@gmail.com'],
+    from: 'snaxupfoods@gmail.com',
+    to: ['webdev@snaxup.com', 'gurisachin09@gmail.com'],
     subject: `New Order #${order_id}`,
     html: `
-      <p>A new order has been placed by ${billing_email}.</p>
-      <p><strong>Order ID:</strong> ${order_id}</p>
-      <p><strong>Items:</strong> ${order_items.map(item => `${item.name} (Qty: ${item.units})`).join(', ')}</p>
-      <p><strong>Pickup Location:</strong></p>
-      <p><strong>Drop Location (Customer's Address):</strong></p>
-      <p>${billing_city}</p>
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f7f7f7; padding: 20px; border-radius: 5px;">
+        <h2 style="color: #4CAF50;">New Order Notification</h2>
+        <p>A new order has been placed by <strong>${billing_email}</strong>.</p>
+        <p><strong>Order ID:</strong> <span style="color: #333;">${order_id}</span></p>
+        
+        <h3 style="color: #4CAF50;">Order Items:</h3>
+        <ul style="list-style-type: none; padding-left: 0;">
+          ${order_items.map(item => `
+            <li style="padding: 8px; background: #fff; margin: 5px 0; border-radius: 4px; border: 1px solid #ddd;">
+              <strong>${item.name}</strong> (Qty: ${item.units})
+            </li>
+          `).join('')}
+        </ul>
+
+        <h3 style="color: #4CAF50;">Locations:</h3>
+        <p><strong>Pickup Location:</strong></p>
+        <p style="background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">Your Pickup Address Here</p>
+        
+        <p><strong>Drop Location (Customer's Address):</strong></p>
+        <p style="background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">${billing_city}</p>
+        
+        <footer style="margin-top: 20px; text-align: center;">
+          <p style="color: #777;">Thank you for your business!</p>
+        </footer>
+      </div>
     `
   };
 
   await transporter.sendMail(mailOptions);
 };
+
 {/* <p>${address.addressLine1}, ${address.addressLine2 ? address.addressLine2 + ', ' : ''}${address.city}, ${address.provience}, ${address.postalCode}, ${address.country}</p> */}
 
 // Create Order API Route
@@ -200,6 +264,24 @@ router.post('/create-order', async (req, res) => {
   }
 });
 
+// POST route to verify payment status by orderId
+
+router.post('/verify-payment', async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const hmac = crypto.createHmac('sha256', ROZAR_SECRET);
+  hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+  const calculatedSignature = hmac.digest('hex');
+
+  if (calculatedSignature === razorpay_signature) {
+    // Payment is verified
+    await updatePaymentStatusInDB(orderId, 'Success', razorpay_payment_id);
+    res.status(200).json({ message: 'Payment verified and status updated' });
+  } else {
+    res.status(400).json({ message: 'Payment verification failed' });
+  }
+});
+
 // POST route to update order status by orderId
 router.post('/update-order-status', async (req, res) => {
   const { orderId, status } = req.body;
@@ -210,7 +292,7 @@ router.post('/update-order-status', async (req, res) => {
 
   try {
     // Step 1: Update the order status in the database
-    const updateOrderQuery = `UPDATE orders SET order_status = ? WHERE id = ?`;
+    const updateOrderQuery = `UPDATE orders SET delvery_status = ? WHERE id = ?`;
     const [result] = await db.promise().query(updateOrderQuery, [status, orderId]);
 
     // Step 2: Check if the order was updated
@@ -243,6 +325,28 @@ const upload = multer({
   })
 });
 
+
+router.put('/upproducts/:id', upload.single('img'), (req, res) => {
+  const id = req.params.id;
+  
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Proceed with updating the img field in the database
+  const img = `/images/${req.file.filename}`;
+  
+  // Example query to update the image in the database
+  const query = 'UPDATE products SET img = ? WHERE id = ?';
+
+  db.query(query, [img, id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.status(200).json({ message: 'Image updated successfully', img });
+  });
+});
 
 
 // API endpoint to get data based on ID 
@@ -308,10 +412,14 @@ router.get('/products/:id', (req, res) => {
 });
 
 
-//to get all products 
+// To get products, optionally filtered by category
+// API endpoint to get data based on either slug or id
 router.get('/products', async (req, res) => {
-  // Query to join the three tables and get all data
-  const query = `
+  // Get the category from query params
+  const { categore } = req.query;
+
+  // Base query to join the three tables and get all data
+  let query = `
     SELECT 
       products.id AS product_id,
       products.short AS product_short,
@@ -320,31 +428,94 @@ router.get('/products', async (req, res) => {
       products.points AS product_points,
       products.categores AS product_categores,
       products.sku AS product_sku,
-      products.price AS product_price, -- Original product price
+      products.price AS product_price,
       products.size AS product_size,
       products.img AS product_img,
       products.feature_img AS product_feature_img,
       products.slug AS product_slug,
-      
 
-
-      actualp.p_price AS actualp_price, -- Renamed to avoid conflict
-      actualp.p_pice AS actualp_piece,  -- Assuming this is 'p_price'
+      actualp.p_price AS actualp_price,
+      actualp.p_pice AS actualp_piece,
       actualp.p_discount AS actualp_discount,
       actualp.editor AS actualp_editor,
       actualp.seoTitle AS actualp_seoTitle,
       actualp.seoDes AS actualp_seoDes,
       actualp.seoKeyword AS actualp_seoKeyword,
       actualp.PageName AS actualp_PageName,
-            actualp.gifts_price AS gifts_price
+      actualp.gifts_price AS gifts_price
 
-      
     FROM 
       products
-
     LEFT JOIN 
-      actualp ON products.id = actualp.p_id;
+      actualp ON products.id = actualp.p_id
   `;
+
+  // Modify the query if a category is provided and it's not "All-Products"
+  if (categore && categore !== 'All-Products') {
+    query += ` WHERE products.categores LIKE '%${categore}%'`;
+  }
+  
+  try {
+    // Execute the query
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error('Database query error:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      // If query is successful, return the results
+      res.json(results);
+    });
+  } catch (error) {
+    // Catch any unexpected errors
+    console.error('Unexpected error:', error);
+    res.status(500).json({ error: 'Unexpected Server Error' });
+  }
+});
+
+router.get('/trending-products', async (req, res) => {
+  // Get the category from query params
+  const { categore } = req.query;
+
+  // Base query to join the three tables and get all data
+  let query = `
+    SELECT 
+      products.id AS product_id,
+      products.short AS product_short,
+      products.title AS product_title,
+      products.des AS product_des,
+      products.points AS product_points,
+      products.categores AS product_categores,
+      products.sku AS product_sku,
+      products.price AS product_price,
+      products.size AS product_size,
+      products.img AS product_img,
+      products.feature_img AS product_feature_img,
+      products.slug AS product_slug,
+
+      actualp.p_price AS actualp_price,
+      actualp.p_pice AS actualp_piece,
+      actualp.p_discount AS actualp_discount,
+      actualp.editor AS actualp_editor,
+      actualp.seoTitle AS actualp_seoTitle,
+      actualp.seoDes AS actualp_seoDes,
+      actualp.seoKeyword AS actualp_seoKeyword,
+      actualp.PageName AS actualp_PageName,
+      actualp.gifts_price AS gifts_price
+
+    FROM 
+      products
+    LEFT JOIN 
+      actualp ON products.id = actualp.p_id
+  `;
+
+  // Modify the query if a category is provided and it's not "All-Products"
+  if (categore && categore !== 'All-Products') {
+    query += ` WHERE products.categores LIKE '%${categore}%'`;
+  }
+
+  // Add LIMIT 10 to restrict the results to 10
+  query += ` LIMIT 10`;
 
   try {
     // Execute the query
@@ -363,6 +534,7 @@ router.get('/products', async (req, res) => {
     res.status(500).json({ error: 'Unexpected Server Error' });
   }
 });
+
 
 //to get all chocolate 
 router.get('/chocolate-products', async (req, res) => {
@@ -382,8 +554,6 @@ router.get('/chocolate-products', async (req, res) => {
       products.feature_img AS product_feature_img,
       products.slug AS product_slug,
       
-
-
       actualp.p_price AS actualp_price, -- Renamed to avoid conflict
       actualp.p_pice AS actualp_piece,  -- Assuming this is 'p_price'
       actualp.p_discount AS actualp_discount,
@@ -393,14 +563,13 @@ router.get('/chocolate-products', async (req, res) => {
       actualp.seoKeyword AS actualp_seoKeyword,
       actualp.PageName AS actualp_PageName,
       actualp.gifts_price AS gifts_price
-      
     FROM 
       products
-
     LEFT JOIN 
       actualp ON products.id = actualp.p_id
     WHERE 
-      products.categores = 'chocolate';  -- Filter products with category "chocolate"
+      products.categores = 'chocolate'
+    LIMIT 10;  -- Limit the results to 10
   `;
 
   try {
@@ -420,45 +589,49 @@ router.get('/chocolate-products', async (req, res) => {
     res.status(500).json({ error: 'Unexpected Server Error' });
   }
 });
+
+
+
 // Get latest 8 products excluding 'chocolate' category, without reviews
 router.get('/products/latest/new', async (req, res) => {
   // Query to join the product and actualp tables, exclude "chocolate" category, and get the latest 8 products
   const query = `
-    SELECT 
-      products.id AS product_id,
-      products.short AS product_short,
-      products.title AS product_title,
-      products.des AS product_des,
-      products.points AS product_points,
-      products.categores AS product_categores,
-      products.sku AS product_sku,
-      products.price AS product_price,
-      products.size AS product_size,
-      products.img AS product_img,
-      products.feature_img AS product_feature_img,
-      products.slug AS product_slug,
+   SELECT 
+  products.id AS product_id,
+  products.short AS product_short,
+  products.title AS product_title,
+  products.des AS product_des,
+  products.points AS product_points,
+  products.categores AS product_categores,
+  products.sku AS product_sku,
+  products.price AS product_price,
+  products.size AS product_size,
+  products.img AS product_img,
+  products.feature_img AS product_feature_img,
+  products.slug AS product_slug,
 
-      actualp.p_price AS actualp_price, 
-      actualp.p_pice AS actualp_piece, 
-      actualp.p_discount AS actualp_discount,
-      actualp.editor AS actualp_editor,
-      actualp.seoTitle AS actualp_seoTitle,
-      actualp.seoDes AS actualp_seoDes,
-      actualp.seoKeyword AS actualp_seoKeyword,
-      actualp.PageName AS actualp_PageName,
-      actualp.gifts_price AS gifts_price
+  MAX(actualp.p_price) AS actualp_price, 
+  MAX(actualp.p_pice) AS actualp_piece, 
+  MAX(actualp.p_discount) AS actualp_discount,
+  MAX(actualp.editor) AS actualp_editor,
+  MAX(actualp.seoTitle) AS actualp_seoTitle,
+  MAX(actualp.seoDes) AS actualp_seoDes,
+  MAX(actualp.seoKeyword) AS actualp_seoKeyword,
+  MAX(actualp.PageName) AS actualp_PageName,
+  MAX(actualp.gifts_price) AS gifts_price
 
-    FROM 
-      products
-    LEFT JOIN 
-      actualp ON products.id = actualp.p_id
-    WHERE 
-      products.categores != 'chocolate'  
-    GROUP BY
-      products.id
-    ORDER BY 
-      products.id DESC 
-    LIMIT 8;
+FROM 
+  products
+LEFT JOIN 
+  actualp ON products.id = actualp.p_id
+WHERE 
+  products.categores != 'chocolate'  
+GROUP BY
+  products.id
+ORDER BY 
+  products.id ASC 
+LIMIT 8;
+
   `;
 
   try {
@@ -755,6 +928,43 @@ router.post('/create-coupon', (req, res) => {
 });
 
 
+// GET route to retrieve all coupons
+router.get('/get-all-coupons', (req, res) => {
+  // SQL query to select all coupons from the database
+  const sql = 'SELECT * FROM coupon';
+
+  // Execute the query
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Error fetching coupons from the database.' });
+    }
+
+    // Respond with the list of coupons
+    res.status(200).json(results);
+  });
+});
+
+
+
+// GET route to retrieve all coupons
+router.get('/banners', (req, res) => {
+  // SQL query to select all coupons from the database
+  const sql = 'SELECT * FROM homebanner';
+
+  // Execute the query
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Error fetching coupons from the database.' });
+    }
+
+    // Respond with the list of coupons
+    res.status(200).json(results);
+  });
+});
+
+
 
 // POST route to add just _review
 router.post('/just_review', (req, res) => {
@@ -820,6 +1030,35 @@ router.get('/all_reviews/:p_id', (req, res) => {
 
   // SQL query to fetch reviews based on p_id and active = 1
   const sql = 'SELECT * FROM review WHERE p_id = ? AND active = 1';
+
+  // Execute the query
+  db.query(sql, [p_id], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Error retrieving reviews from the database.' });
+    }
+
+    // If no reviews found
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No active reviews found for the given product ID.' });
+    }
+
+    // Respond with the active reviews data
+    res.status(200).json(results);
+  });
+});
+
+// GET route to fetch reviews by p_id, but only where active = 1
+router.get('/all_reviews', (req, res) => {
+  const { p_id } = req.params;
+
+  // Validate if p_id is provided
+  // if (!p_id) {
+  //   return res.status(400).json({ error: 'Product ID (p_id) is required.' });
+  // }
+
+  // SQL query to fetch reviews based on p_id and active = 1
+  const sql = 'SELECT * FROM review';
 
   // Execute the query
   db.query(sql, [p_id], (err, results) => {
@@ -943,7 +1182,8 @@ router.post('/validate-coupon', (req, res) => {
 });
 
 module.exports = router;
-
+// user: "surbhigulhana3@gmail.com", // Set this in your .env file
+// pass: "hsae ltyz ogjq dbox" // Set this in your .env file
 
 // Nodemailer setup
 const transporter = nodemailer.createTransport({
@@ -951,8 +1191,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: "surbhigulhana3@gmail.com", // Set this in your .env file
-    pass: "hsae ltyz ogjq dbox" // Set this in your .env file
+    user: "snaxupfoods@gmail.com", // Set this in your .env file
+    pass: "xbkx qpmv syij unzv" // Set this in your .env file
   }
 });
 
@@ -971,7 +1211,7 @@ router.post('/send-contactus', (req, res) => {
     // Send email
     const mailOptions = {
       from: email, // Change this to your email address
-      to: "surbhigulhana3@gmail.com",
+      to: "webdev@snaxup.com",
       subject: 'New Inquiry',
       text: `Name: ${name}\nMessage: ${msg}\nPhone: ${phone}\nEmail: ${email}`
 
@@ -1014,7 +1254,7 @@ router.post('/send-subscribe', (req, res) => {
       // Send email
       const mailOptions = {
         from: email, // Change this to your email address
-        to: 'surbhigulhana3@gmail.com',
+        to: 'webdev@snaxup.com',
         subject: 'New Subscription',
         text: `A new subscription has been received: \nEmail: ${email}`,
       };
@@ -1267,31 +1507,35 @@ router.get('/gifts/:id', (req, res) => {
 
 
 // POST route to upload data to the gifts box
+// POST route to upload data to the gifts box
 router.post('/gifts_box', upload.fields([
-  { name: 'img', maxCount: 1 },   // Single image for feature_img
+  { name: 'img', maxCount: 2 },   // Allow up to 2 images for the 'img' field
 ]), (req, res) => {
   const { title, size, space, box_price, mrp } = req.body;
 
   // Check if files are uploaded
-  if (!req.files.img) {
-    return res.status(400).json({ error: 'Please upload images for feature_img and img fields.' });
+  if (!req.files || !req.files['img'] || req.files['img'].length !== 2) {
+    return res.status(400).json({ error: 'Please upload exactly 2 images for the feature_img field.' });
   }
 
-  // Extracting uploaded files
-  const featureImage = req.files['img'] ? req.files['img'][0].filename : null;
+  // Extracting uploaded images (both images from the 'img' field)
+  const featureImages = req.files['img'].map(file => file.filename);
 
   // Build URLs for the uploaded images
   const baseUrl = `${req.protocol}://${req.get('host')}/images/`;  // Assuming images are in 'uploads' folder
-  const featureImageUrl = featureImage ? baseUrl + featureImage : null;
+  const featureImageUrls = featureImages.map(image => baseUrl + image);  // Array of image URLs
 
   // Log the URLs being generated
-  console.log("URL for feature image:", featureImageUrl);
+  console.log("URLs for feature images:", featureImageUrls);
 
-  // SQL query to insert data
+  // SQL query to insert data (storing the image URLs as a stringified array or as per your DB schema)
   const query = `INSERT INTO custom_box (title, size, space, box_price, img, mrp) VALUES (?, ?, ?, ?, ?, ?)`;
 
+  // Store the image URLs (could store as JSON, or separate columns, depending on your database design)
+  const imgFieldValue = JSON.stringify(featureImageUrls);
+
   // Execute the query
-  db.query(query, [title, size, space,box_price, featureImageUrl, mrp], (err, result) => {
+  db.query(query, [title, size, space, box_price, imgFieldValue, mrp], (err, result) => {
     if (err) {
       console.error('Error inserting data:', err);
       res.status(500).send('Error inserting data');
@@ -1389,7 +1633,7 @@ router.post('/home-banners', upload.fields([
   const firstBanner = req.files['firstBanner'][0].filename;
 
   // Build URLs for the uploaded images
-  const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
+  const baseUrl = `${req.protocol}://${req.get('host')}/images/`;
   const firstBannerUrl = baseUrl + firstBanner;
 
   // SQL query to insert data into the homebanner table
@@ -1477,7 +1721,6 @@ router.post('/orders', async (req, res) => {
 
 
 
-
 // GET route to retrieve order details by order ID
 router.get('/orders/:orderId', async (req, res) => {
   const { orderId } = req.params;
@@ -1488,7 +1731,7 @@ router.get('/orders/:orderId', async (req, res) => {
   }
 
   try {
-    // Query to get the order details along with user and items
+    // Query to get the order details along with user, items, and product titles
     const orderQuery = `
       SELECT 
         o.id AS orderId, 
@@ -1500,13 +1743,15 @@ router.get('/orders/:orderId', async (req, res) => {
         a.provience, 
         a.postal_code AS postalCode, 
         a.country,
-        GROUP_CONCAT(CONCAT(oi.product_id, ':', oi.quantity, ':', oi.size, ':', oi.price) ORDER BY oi.id) AS items
+        GROUP_CONCAT(CONCAT(oi.product_id, ':', p.title, ':', oi.quantity, ':', oi.size, ':', oi.price) ORDER BY oi.id) AS items
       FROM 
         orders o
       JOIN 
         addresses a ON o.address_id = a.id
       JOIN 
         order_items oi ON o.id = oi.order_id
+      JOIN 
+        products p ON oi.product_id = p.id
       WHERE 
         o.id = ?
       GROUP BY 
@@ -1547,6 +1792,8 @@ router.get('/orders/user/:userId', async (req, res) => {
           o.afterdiscount, 
         o.discount, 
         o.payment_method AS paymentMethod, 
+                o.delvery_status AS delvery_status, 
+
         o.order_status AS orderStatus,
         a.address_line_1 AS addressLine1, 
         a.city, 
@@ -1669,7 +1916,7 @@ router.get('/Allorders', async (req, res) => {
   try {
     // Query to get all orders along with user and address details
     const query = `
-      SELECT o.id AS orderId, o.total_amount, o.discount, o.order_status, o.payment_method, 
+      SELECT o.id AS orderId, o.total_amount, o.discount, o.order_status, o.payment_method,o.delvery_status, 
              u.fullname, u.phone,u.email, a.address_line_1, a.city, a.provience, a.postal_code, a.country
       FROM orders o
       JOIN signup u ON o.user_id = u.id
@@ -1723,7 +1970,7 @@ router.post('/send-otp', (req, res) => {
 
     // Send OTP email
     const mailOptions = {
-      from: "surbhigulhana3@gmail.com",
+      from: "snaxupfoods@gmail.com",
       to: email,
       subject: 'Your OTP for Login',
       text: `Your OTP is ${otp}. It is valid for 15 minutes.`,
@@ -1817,6 +2064,32 @@ router.post('/admin_login', (req, res) => {
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
+  });
+});
+
+
+// Route to update order status
+router.put('/Edit_order/:id', (req, res) => {
+  const orderId = req.params.id;
+  const { delvery_status } = req.body;
+
+  if (!delvery_status) {
+    return res.status(400).send({ error: 'Order status is required' });
+  }
+
+  const query = 'UPDATE orders SET delvery_status = ? WHERE id = ?';
+
+  db.query(query, [delvery_status, orderId], (err, result) => {
+    if (err) {
+      console.error('Error updating order status:', err);
+      return res.status(500).send({ error: 'Database error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ error: 'Order not found' });
+    }
+
+    res.send({ message: 'Order status updated successfully' });
   });
 });
 
@@ -1998,6 +2271,203 @@ router.patch('/upadteProducts/:id', upload.fields([
   }
 });
 
+
+router.patch('/updateProductsimg/:id', upload.fields([
+  { name: 'img', maxCount: 5 }  // Multiple images (max 5)
+]), async (req, res) => {
+  const productId = req.params.id;
+
+  // Get existing product details from the database
+  const getProductQuery = 'SELECT * FROM products WHERE id = ?';
+
+  try {
+    // Fetch the existing product details
+    db.query(getProductQuery, [productId], (productError, productResult) => {
+      if (productError || productResult.length === 0) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+
+      const existingProduct = productResult[0];
+
+      // Extract existing image URLs from the database
+      let existingImages = existingProduct.img ? JSON.parse(existingProduct.img) : [];
+
+      // Extract new image filenames from the request if uploaded
+      const newImages = req.files['img'] ? req.files['img'].map(file => `${req.protocol}://${req.get('host')}/images/${file.filename}`) : [];
+
+      // Combine existing images with new images
+      const updatedImages = [ ...newImages, ...existingImages];
+
+      // Create the update query for the product
+      const updateProductQuery = `
+        UPDATE products SET
+          img = ?
+        WHERE id = ?
+      `;
+
+      // Update the product in the database
+      db.query(updateProductQuery, [
+        JSON.stringify(updatedImages),  // Save the updated image URLs as JSON string
+        productId
+      ], (productUpdateError) => {
+        if (productUpdateError) {
+          return res.status(500).json({ error: 'Product update error' });
+        }
+
+        // If the update is successful, send the response
+        res.status(200).json({
+          message: 'Product updated successfully',
+          images: updatedImages
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Unexpected Server Error:', error);
+    res.status(500).json({ error: 'Unexpected Server Error' });
+  }
+});
+
+
+// PUT route to update a banner image in the homebanner table by ID
+router.put('/home-banners/:id', upload.fields([
+  { name: 'firstBanner', maxCount: 1 },  // Update single file for firstBanner
+]), (req, res) => {
+  
+  // Get the banner ID from the URL parameters
+  const bannerId = req.params.id;
+console.log(req.files.firstBanner)
+  // Check if files are uploaded
+  if (!req.files.firstBanner) {
+    return res.status(400).json({ error: 'Please upload the banner' });
+  }
+
+  // Extract the new filename from req.files
+  const firstBanner = req.files['firstBanner'][0].filename;
+
+  // Build the new URL for the uploaded banner image
+  const baseUrl = `${req.protocol}://${req.get('host')}/images/`;
+  const firstBannerUrl = baseUrl + firstBanner;
+
+  // SQL query to update the banner image in the homebanner table based on the ID
+  const query = `UPDATE homebanner SET firstBanner = ? WHERE id = ?`;
+
+  // Execute the query
+  db.query(query, [firstBannerUrl, bannerId], (err, result) => {
+    if (err) {
+      console.error('Error updating banner image:', err);
+      res.status(500).send('Error updating banner image');
+    } else {
+      if (result.affectedRows === 0) {
+        res.status(404).json({ message: 'Banner not found' });
+      } else {
+        res.status(200).json({
+          message: 'Banner image updated successfully',
+          data: {
+            firstBanner: firstBannerUrl
+          }
+        });
+      }
+    }
+  });
+});
+
+// Ensure that the images directory exists
+// const imagesDirectory = path.join(__dirname, 'images');
+// if (!fs.existsSync(imagesDirectory)) {
+//   fs.mkdirSync(imagesDirectory, { recursive: true });
+// }
+
+
+// router.patch('/updateProductsimg/:id', upload.fields([
+//   { name: 'img', maxCount: 5 }
+// ]), async (req, res) => {
+//   const productId = req.params.id;
+
+//   // Get existing product details from the database
+//   const getProductQuery = 'SELECT * FROM products WHERE id = ?';
+
+//   try {
+//     // Fetch the existing product details
+//     db.query(getProductQuery, [productId], async (productError, productResult) => {
+//       if (productError || productResult.length === 0) {
+//         return res.status(404).json({ error: 'Product not found' });
+//       }
+
+//       const existingProduct = productResult[0];
+//       let existingImages = existingProduct.img ? JSON.parse(existingProduct.img) : [];
+
+//       const imageProcessingPromises = (req.files['img'] || []).map(async (file) => {
+//         const originalFormat = file.mimetype;
+//         const filePath = file.path;
+//         let processedBuffer;
+
+//         // Check if the image is in webp format
+//         if (originalFormat === 'image/webp') {
+//           processedBuffer = file.buffer;
+//         } else {
+//           // Convert to webp and compress the image
+//           processedBuffer = await sharp(filePath)
+//             .toFormat('webp', { quality: 80 })
+//             .toBuffer();
+//         }
+
+//         // Compress the image to be between 50KB and 60KB
+//         let sizeInKB = Buffer.byteLength(processedBuffer) / 1024;
+//         let quality = 80;
+
+//         while (sizeInKB > 60 && quality > 10) {
+//           processedBuffer = await sharp(processedBuffer)
+//             .toFormat('webp', { quality: quality -= 5 })
+//             .toBuffer();
+//           sizeInKB = Buffer.byteLength(processedBuffer) / 1024;
+//         }
+
+//         if (sizeInKB < 50) {
+//           return res.status(400).json({ error: 'Compressed image is too small. Minimum size is 50KB.' });
+//         }
+
+//         // Use absolute path and a cleaner filename
+//         const newFileName = `processed_${Date.now()}.webp`;
+//         const newFilePath = path.join(imagesDirectory, newFileName);
+
+//         // Save the processed image
+//         await sharp(processedBuffer).toFile(newFilePath);
+
+//         // Return the URL for the uploaded image
+//         return `${req.protocol}://${req.get('host')}/images/${newFileName}`;
+//       });
+
+//       // Process all image uploads
+//       const newImages = await Promise.all(imageProcessingPromises);
+//       const updatedImages = [...existingImages, ...newImages.filter(img => img)];
+
+//       // Create the update query for the product
+//       const updateProductQuery = `
+//         UPDATE products SET
+//           img = ?
+//         WHERE id = ?
+//       `;
+
+//       // Update the product in the database
+//       db.query(updateProductQuery, [
+//         JSON.stringify(updatedImages),
+//         productId
+//       ], (productUpdateError) => {
+//         if (productUpdateError) {
+//           return res.status(500).json({ error: 'Product update error' });
+//         }
+
+//         res.status(200).json({
+//           message: 'Product updated successfully',
+//           images: updatedImages
+//         });
+//       });
+//     });
+//   } catch (error) {
+//     console.error('Unexpected Server Error:', error);
+//     res.status(500).json({ error: 'Unexpected Server Error' });
+//   }
+// });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
